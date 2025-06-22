@@ -1,5 +1,3 @@
-import Distribution.Simple.Utils (xargs)
-
 doubleMe x = x + x
 
 doubleSmallNum x = if x > 100 then x else x * 2
@@ -115,3 +113,78 @@ maximum' (x : xs)
   | otherwise = maxTail
   where
     maxTail = maximum' xs
+
+replicate' x y
+  | x == 0 = []
+  | otherwise = y : replicate' (x - 1) y
+
+take' :: (Integral a) => a -> [b] -> [b]
+take' _ [] = []
+take' 0 xs = []
+take' y (x : xs) = x : take' (y - 1) xs
+
+-- Weirdly, this still doesn't seem to work with n 
+taker :: (Integral a) => a -> [b] -> [b]
+taker n xs
+  | n <= 0 = []
+taker _ [] = []
+taker n (x : xs) = x : take' (n - 1) xs
+
+
+-- polymorphism?
+-- poly a = a
+-- poly a b = b 
+-- no. 
+
+
+elem' :: (Eq a) => a -> [a] -> Bool
+elem' x [] = False
+-- Not in Kansas now, Dorothy.
+--elem' x (y: ys) = y == x || elem' x ys
+elem' x (y: ys)
+  | y == x = True
+  | otherwise = elem' x ys
+
+
+-- quicksort
+-- a sorted list, a middle, a sorted list
+quicksort' :: (Ord a) => [a] -> [a]
+quicksort' [] = []
+-- quicksort' [a] = [a]
+-- quicksort' [a,b] = [a,b]
+-- quicksort' (x:xs) = [i ++ (j : k) | let i = [1], let j = 2, let k = [3]]
+quicksort' (x:xs) = [y | y <- xs, y < x] ++ (x : [y | y <- xs, x <= y])
+
+-- That's quite interesting.
+quicksort_ :: Ord a => [a] -> [a]
+quicksort_ [] = []
+quicksort_ (x:xs) = less ++ (x: greater)
+  where
+    less = quicksort_ [y | y <- xs, y < x]
+    greater = quicksort_ [y | y <- xs, x <= y]
+
+
+-- Can partially apply infix functions with (). E.g.
+b = (/10) 100
+
+c = (10/) 100
+
+-- Higher order
+-- applyTwice :: 
+applyTwice f x = f (f x)
+
+-- alt
+appliesTwice f = f . f
+
+
+getDouble x = doubleMe
+
+zipWith' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith' _ [] _ = []
+zipWith' _ _ [] = []
+zipWith' f (x:xs) (y:ys) = f x y : zipWith' f xs ys
+
+-- Reverse the order of the arguments.
+flip' :: (a -> b -> c) -> (b -> a -> c)
+flip' f = g 
+  where g x y = f y x
