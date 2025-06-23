@@ -123,28 +123,25 @@ take' _ [] = []
 take' 0 xs = []
 take' y (x : xs) = x : take' (y - 1) xs
 
--- Weirdly, this still doesn't seem to work with n 
+-- Weirdly, this still doesn't seem to work with n
 taker :: (Integral a) => a -> [b] -> [b]
 taker n xs
   | n <= 0 = []
 taker _ [] = []
 taker n (x : xs) = x : take' (n - 1) xs
 
-
 -- polymorphism?
 -- poly a = a
--- poly a b = b 
--- no. 
-
+-- poly a b = b
+-- no.
 
 elem' :: (Eq a) => a -> [a] -> Bool
 elem' x [] = False
 -- Not in Kansas now, Dorothy.
---elem' x (y: ys) = y == x || elem' x ys
-elem' x (y: ys)
+-- elem' x (y: ys) = y == x || elem' x ys
+elem' x (y : ys)
   | y == x = True
   | otherwise = elem' x ys
-
 
 -- quicksort
 -- a sorted list, a middle, a sorted list
@@ -153,38 +150,120 @@ quicksort' [] = []
 -- quicksort' [a] = [a]
 -- quicksort' [a,b] = [a,b]
 -- quicksort' (x:xs) = [i ++ (j : k) | let i = [1], let j = 2, let k = [3]]
-quicksort' (x:xs) = [y | y <- xs, y < x] ++ (x : [y | y <- xs, x <= y])
+quicksort' (x : xs) = [y | y <- xs, y < x] ++ (x : [y | y <- xs, x <= y])
 
 -- That's quite interesting.
-quicksort_ :: Ord a => [a] -> [a]
+quicksort_ :: (Ord a) => [a] -> [a]
 quicksort_ [] = []
-quicksort_ (x:xs) = less ++ (x: greater)
+quicksort_ (x : xs) = less ++ (x : greater)
   where
     less = quicksort_ [y | y <- xs, y < x]
     greater = quicksort_ [y | y <- xs, x <= y]
 
-
 -- Can partially apply infix functions with (). E.g.
-b = (/10) 100
+b = (/ 10) 100
 
-c = (10/) 100
+c = (10 /) 100
 
 -- Higher order
--- applyTwice :: 
+-- applyTwice ::
 applyTwice f x = f (f x)
 
 -- alt
 appliesTwice f = f . f
-
 
 getDouble x = doubleMe
 
 zipWith' :: (a -> b -> c) -> [a] -> [b] -> [c]
 zipWith' _ [] _ = []
 zipWith' _ _ [] = []
-zipWith' f (x:xs) (y:ys) = f x y : zipWith' f xs ys
+zipWith' f (x : xs) (y : ys) = f x y : zipWith' f xs ys
 
 -- Reverse the order of the arguments.
 flip' :: (a -> b -> c) -> (b -> a -> c)
-flip' f = g 
-  where g x y = f y x
+flip' f = g
+  where
+    g x y = f y x
+
+-- Simpler implementation
+flip_ :: (a -> b -> c) -> b -> a -> c
+flip_ f y x = f x y
+
+-- Alternative implementation, which uses filter (a h.o.f.)
+quicksorted [] = []
+quicksorted (x : xs) = sortedLeft ++ x : sortedRight
+  where
+    sortedLeft = quicksorted (filter (< x) xs)
+    sortedRight = quicksorted (filter (>= x) xs)
+
+-- Make a list of multiplicative functions and apply one of them
+somefunc = map (*) [1 ..] !! 5
+
+-- Lambdas
+-- These two are equivalent
+withoutLambdas :: (Num a) => a -> a -> a -> a
+withoutLambdas a b c = a + b + c
+
+withLambdas :: (Num a) => a -> a -> a -> a
+withLambdas = \x -> \y -> \z -> x + y + z
+
+-- foldl (fold from the left/reduce)
+-- foldl (\acc x -> acc + x) 19 [1,5..20]
+
+folde e = foldl (\acc x -> acc || (x == e)) False
+
+-- Note that the lambda params have swapped.
+forde e = foldr (\x acc -> if x == e then True else acc) False
+
+-- e.g. folde 5 [1..10]
+
+map' f = foldr (\x acc -> (f x) : acc) []
+
+-- todo
+-- maximum_
+maximum_ :: (Ord a) => [a] -> a
+maximum_ = foldl1 max
+
+-- product_
+product_ :: (Num a) => [a] -> a
+product_ = foldl1 (*)
+
+-- head_ (this is silly)
+head_ :: [a] -> a
+head_ = foldl1 const
+
+-- not sure I understand why this works
+head__ :: [a] -> a
+head__ = foldr1 const
+
+-- last_
+last_ :: [a] -> a
+last_ = foldl1 (flip const)
+
+-- filter_
+filter_ expression = foldr (\x acc -> if expression x then x : acc else acc) []
+
+-- reverse_
+reverse_ :: [a] -> [a]
+reverse_ = foldl (flip (:)) []
+
+p :: Integer -> Integer -> Integer
+p = flip (+)
+
+-- scanl and scanr are like foldl and foldr,
+-- only they report all the intermediate accumulator states in the form of a list.
+-- scanl (+) 0 [1..10]
+
+maybeadd :: (Num b) => Maybe b -> b -> Maybe b
+maybeadd x y = x >>= (\x -> Just $ x + y)
+
+-- maybeadd Nothing 2
+-- maybeadd (Just 1) 2
+
+-- From https://www.youtube.com/watch?v=IBB7JpbClo8
+monadd mx my = do
+  x <- mx
+  y <- my
+  return (x + y)
+
+-- monadd (Just 100) (Just 1.0)
