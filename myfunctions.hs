@@ -257,7 +257,7 @@ p = flip (+)
 -- scanl (+) 0 [1..10]
 
 maybeadd :: (Num b) => Maybe b -> b -> Maybe b
-maybeadd x y = x >>= (\x -> Just $ x + y)
+maybeadd x y = x >>= (\x -> Prelude.Just $ x + y)
 
 -- maybeadd Nothing 2
 -- maybeadd (Just 1) 2
@@ -318,3 +318,52 @@ surfaceArea (Rect x1 y1 x2 y2) = abs (x2 - x1) * abs (y2 - y1)
 
 -- Can display with
 -- show (Circle 10 0 0)
+
+-- Notice that, for Point, we use the same name for the data type
+-- and for the value constructor, which is common if there is only one constructor.
+data Point = Point Float Float deriving (Show)
+
+-- Notice here that there are two constructors and neither has the name of the type.
+data Shap = Circular Point Float | Rectangle Point Point deriving (Show)
+
+-- Using "record syntax"
+data Car = Car {company :: String, model :: String, year :: Int} deriving (Show)
+
+mustang = Car "Ford" "Mustang" 1067
+
+-- can now do
+-- ghci> company mustang
+
+data Maybee a = Nothing | Just a
+
+-- Maybee is a type constructor.
+-- No value can have a type of Maybee but could
+-- have a type of Maybee Int.
+-- ghci> :k Maybee Int
+-- Maybee Int : *
+-- ghci> :t Just 1
+-- Just 1 :: Num a => Maybee a
+
+-- A 3D Vector type
+data Vector a = Vector a a a deriving (Show)
+
+(Vector i j k) `vplus` (Vector l m n) = Vector (i + l) (m + j) (n + k)
+
+-- Use of the deriving to make Person and instance of the Eq typeclass.
+data Person = Person
+  { firstName :: String,
+    lastName :: String,
+    age :: Int
+  }
+  deriving (Eq, Show, Read)
+
+md = read "Person {firstName =\"Michael\", lastName =\"Diamond\", age = 43}" :: Person
+
+-- Because all of the value constructors are nullary (take no params)
+-- we can use Enum, a typeclass for things with predecessors and successors.
+-- Bounded is for things that have a lowest and highest possible value.
+data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
+  deriving (Eq, Ord, Show, Read, Bounded, Enum)
+
+-- Note that minBound doesn't seem to be a function
+-- ghci> minBound :: Day
