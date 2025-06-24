@@ -1,3 +1,5 @@
+import Data.List
+
 doubleMe x = x + x
 
 doubleSmallNum x = if x > 100 then x else x * 2
@@ -267,3 +269,52 @@ monadd mx my = do
   return (x + y)
 
 -- monadd (Just 100) (Just 1.0)
+
+-- Can we define our own infix function?
+-- (blob) :: (a -> b) -> a -> b
+-- f blob x = f x
+-- not easily
+
+-- $ is often used for convenience, to remove the need for brackets
+
+aaa = sqrt $ 3 + 4 + 9
+
+aab = sqrt (3 + 4 + 9)
+
+aac = sum (filter (> 10) (map (* 2) [2 .. 10]))
+
+aad = sum $ filter (> 10) $ map (* 2) [2 .. 10]
+
+-- function composition
+allNegative = map (\x -> negate $ abs x)
+
+allNegative_ = map $ negate . abs
+
+repli = (sum . replicate 5 . max 6.7)
+
+-- point free style
+somefu x = ceiling (negate (tan (cos (max 50 x))))
+
+otherfu = ceiling . negate . tan . cos . max 50
+
+oddSquareSum :: Integer
+oddSquareSum = sum (takeWhile (< 10000) (filter odd (map (^ 2) [1 ..])))
+
+oddSquareSum' = sum . takeWhile (< 1000) $ filter odd . map (^ 2) $ [1 ..]
+
+somenumbs = intersperse 5 [1 .. 10]
+
+-- More on modules todo
+
+-- Data types and typeclasses
+data Shape
+  = Circle Float Float Float
+  | Rect Float Float Float Float
+  deriving (Show)
+
+-- Note that Circle and Rect are not types but Shape is.
+surfaceArea (Circle _ _ r) = pi * r ^ 2
+surfaceArea (Rect x1 y1 x2 y2) = abs (x2 - x1) * abs (y2 - y1)
+
+-- Can display with
+-- show (Circle 10 0 0)
