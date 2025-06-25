@@ -1,4 +1,5 @@
 import Data.List
+import Data.Map (Map, fromList, toList)
 
 doubleMe x = x + x
 
@@ -367,3 +368,125 @@ data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
 
 -- Note that minBound doesn't seem to be a function
 -- ghci> minBound :: Day
+
+-- type for type aliases
+type PhoneNumber = String
+
+type Name = String
+
+type Entry = (Name, PhoneNumber)
+
+type PhoneBook = [Entry]
+
+inPhoneBook :: Entry -> PhoneBook -> Bool
+inPhoneBook e p = e `elem` p
+
+-- We can parameterise type synonyms too:
+type AssocList k v = [(k, v)]
+
+-- Did they just sneakily introduce monands?
+getFromAssocList :: (Eq k) => k -> AssocList k v -> Maybe v
+getFromAssocList _ [] = Prelude.Nothing
+getFromAssocList k (x : xs) = if k == fst x then Prelude.Just (snd x) else getFromAssocList k xs
+
+xy Prelude.Nothing = 1
+xy (Prelude.Just a) = a
+
+-- Some recursive data structures
+-- A tree is either an empty tree or a node with two tree branches.
+data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Read, Eq)
+
+singletonTree x = Node x EmptyTree EmptyTree
+
+treeInsert :: (Ord a) => a -> Tree a -> Tree a
+treeInsert x EmptyTree = singletonTree x
+treeInsert x (Node a t1 t2)
+  | x == a = Node x t1 t2
+  | x < a = Node a (treeInsert x t1) t2
+  | otherwise = Node a t1 (treeInsert x t2)
+
+treeElem :: (Ord a) => a -> Tree a -> Bool
+treeElem _ EmptyTree = False
+treeElem x (Node a t1 t2)
+  | x == a = True
+  | x < a = treeElem x t1
+  | otherwise = treeElem x t2
+
+-- data is for defining new types
+-- class is for typeclasses (kinda like interfaces)
+data Fruit = Apple | Banana deriving (Show)
+
+instance Eq Fruit where
+  Apple == Apple = True
+  Banana == Banana = True
+  _ == _ = False
+
+-- Just because we can.
+-- we'll make our Fruit "an instance" of the Num typeclass.
+instance Num Fruit where
+  (+) a b = Apple
+  (-) a b = Apple
+  (*) a b = Apple
+  negate a = if a == Apple then Banana else Apple
+  abs a = a
+  signum a = a
+  fromInteger i = Banana
+
+-- "We want all types of the form Maybee m to be
+-- part of the Eq typeclass, but only those types
+-- where the m is also part of Eq."
+instance (Eq m) => Eq (Maybee m) where
+  Main.Just x == Main.Just y = x == y
+  Main.Nothing == Main.Nothing = True
+  _ == _ = False
+
+-- A YesNo typeclass (truthy thing)
+class YesNo a where
+  yesno :: a -> Bool
+
+instance YesNo Int where
+  yesno 0 = False
+  yesno _ = True
+
+instance YesNo [unused] where
+  yesno [] = False
+  yesno _ = True
+
+instance YesNo Bool where
+  yesno = id
+
+-- Is this smart? Probably not.
+instance (YesNo a) => YesNo (Maybee a) where
+  yesno Main.Nothing = False
+  yesno (Main.Just x) = yesno x
+
+-- And now, we're going to take a look at the Functor typeclass,
+-- which is basically for things that can be mapped over.
+-- Note that functor is for things that implement fmap,
+-- it isn't for functions.
+
+-- In fact, map is just a fmap that works only on lists. !
+
+-- Can we make Data.Map's Map an instance of Functor?
+
+-- This is left as an exercise but not a very clear one.
+-- We get a duplicate instance error if we uncomment...
+-- instance Functor (Map k) where
+--  fmap f m = fromList $ f $ toList m
+
+-- Since Functor is already defined, we'll make our own typeclass
+class Functor' f where
+  fmap' :: (a -> b) -> f a -> f b
+
+instance (Ord k) => Functor' (Map k) where
+  fmap' f m = fromList (map (\(x, y) -> (x, f y)) (toList m))
+
+fmapped = fmap' (* 19) (fromList [("a", 1), ("b", 2)])
+
+class Tofu t where
+  tofu :: j a -> t a j
+
+data Frank a b = Frank {frankField :: b a} deriving (Show)
+
+instance Tofu Frank where
+  tofu = Frank
