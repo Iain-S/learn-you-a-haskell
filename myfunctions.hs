@@ -486,7 +486,33 @@ fmapped = fmap' (* 19) (fromList [("a", 1), ("b", 2)])
 class Tofu t where
   tofu :: j a -> t a j
 
+-- the LHS must be * so we assume a is * and j is * -> *
+-- the RHS must be * so we assume t is * -> (* -> *) -> *
+-- note that (* -> *) is a type constructor
+
 data Frank a b = Frank {frankField :: b a} deriving (Show)
 
 instance Tofu Frank where
   tofu = Frank
+
+-- Takes a type, a, and a type constructor, t, and makes a t of a
+data Blob a t = Blob (t a) deriving (Show)
+-- data Boob a b = Boob a b 
+
+instance Tofu Blob where
+  tofu = Blob
+
+-- Barry has kind of (* -> *) -> * -> *
+data Barry t k p = Barry { yabba :: p, dabba :: t k } deriving (Show)
+-- So Barry Maybe Int should habe type * -> *, suitable for functor'
+
+instance Functor' (Barry t k) where
+  fmap' f b = Barry {yabba = f $ yabba b, dabba = dabba b}
+  -- or
+  -- fmap' f (Barry {yabba = y, dabba = d}) = Barry {yabba = y, dabba = d}
+
+bazza = fmap' (*11) Barry {yabba = 2.0, dabba = [1]}
+
+-- Input/Output
+
+mapM' f = sequence . map f
