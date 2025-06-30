@@ -9,9 +9,11 @@ main = do
   let cLines = lines contents
   let nLines = length cLines
   putStrLn "Which item would you like to remove?"
+
+  -- Note that this could have been a zipWith instead.
   mapM_
     (\(x, y) -> putStrLn (show x ++ " - " ++ y))
-    (zip [1 .. nLines] cLines)
+    (zip [1 ..] cLines)
   putStrLn "Item: "
 
   response <- getLine
