@@ -1,9 +1,11 @@
 import Data.List
 import System.Directory
+import System.Environment
 import System.IO
 
-main = do
-  handle <- openFile "todo.txt" ReadMode
+removeTodo [] = putStrLn "Usage: todo.hs <todofile.txt>"
+removeTodo [fileName] = do
+  handle <- openFile fileName ReadMode
   contents <- hGetContents handle
 
   let cLines = lines contents
@@ -17,13 +19,22 @@ main = do
   putStrLn "Item: "
 
   response <- getLine
-  let itemNum = read response - 1
+  if response == ""
+    then
+      return ()
+    else do
+      let itemNum = read response - 1
 
-  let newLines = delete (cLines !! itemNum) cLines
+      let newLines = delete (cLines !! itemNum) cLines
 
-  tHandle <- openTempFile "." "todo.tmp"
-  hPutStr (snd tHandle) (unlines newLines)
-  hClose (snd tHandle)
+      tHandle <- openTempFile "." "todo.tmp"
+      hPutStr (snd tHandle) (unlines newLines)
+      hClose (snd tHandle)
 
-  hClose handle
-  renameFile (fst tHandle) "todo.txt"
+      hClose handle
+      renameFile (fst tHandle) fileName
+removeTodo (x : xs) = putStrLn "Usage: todo.hs <todofile.txt>"
+
+main = do
+  args <- getArgs
+  removeTodo args
