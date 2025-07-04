@@ -1,9 +1,11 @@
 import Control.Monad
+
 main = do
   putStrLn "Hello, what's your name?"
   line <- getLine
-  if line == "" then
-    return subMain -- doesn't do anything useful
+  if line == ""
+    then
+      return subMain -- doesn't do anything useful
     else do
       putStrLn $ reverseWords line
       main
@@ -11,7 +13,7 @@ main = do
 reverseWords :: String -> String
 reverseWords = unwords . reverse . words
 
--- Return makes an I/O out of a pure value. 
+-- Return makes an I/O out of a pure value.
 -- It DOES NOT stop execution by returning from a function.
 subMain = do
   a <- return "hi"
@@ -28,5 +30,3 @@ altMain = do
 seqMain = do
   rs <- sequence [getChar, getChar, getChar]
   print rs
-
-

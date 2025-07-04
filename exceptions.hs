@@ -1,10 +1,10 @@
-import System.Environment
 import Control.Exception
+import System.Environment
 import System.IO.Error
 
 -- Fails if we can't lookup the value in the list.
 mainLookup = do
-    print $ takesVal $ lookup 3 [(1,2)]
+  print $ takesVal $ lookup 3 [(1, 2)]
 
 takesVal (Just x) = x
 
@@ -15,13 +15,13 @@ mainRaises = tryTo
 
 main = tryTo `catch` handler
 
-tryTo = do 
-    (filename:_) <- getArgs
-    contents <- readFile filename
-    putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines."
+tryTo = do
+  (filename : _) <- getArgs
+  contents <- readFile filename
+  putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines."
 
 -- Only try to handle doesNotExist errors.
 handler :: IOError -> IO ()
-handler e 
+handler e
   | isDoesNotExistError e = putStrLn "Ooops, an error happened"
   | otherwise = ioError e

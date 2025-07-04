@@ -497,21 +497,24 @@ instance Tofu Frank where
 
 -- Takes a type, a, and a type constructor, t, and makes a t of a
 data Blob a t = Blob (t a) deriving (Show)
--- data Boob a b = Boob a b 
+
+-- data Boob a b = Boob a b
 
 instance Tofu Blob where
   tofu = Blob
 
 -- Barry has kind of (* -> *) -> * -> *
-data Barry t k p = Barry { yabba :: p, dabba :: t k } deriving (Show)
+data Barry t k p = Barry {yabba :: p, dabba :: t k} deriving (Show)
+
 -- So Barry Maybe Int should habe type * -> *, suitable for functor'
 
 instance Functor' (Barry t k) where
   fmap' f b = Barry {yabba = f $ yabba b, dabba = dabba b}
-  -- or
-  -- fmap' f (Barry {yabba = y, dabba = d}) = Barry {yabba = y, dabba = d}
 
-bazza = fmap' (*11) Barry {yabba = 2.0, dabba = [1]}
+-- or
+-- fmap' f (Barry {yabba = y, dabba = d}) = Barry {yabba = y, dabba = d}
+
+bazza = fmap' (* 11) Barry {yabba = 2.0, dabba = [1]}
 
 -- Input/Output
 
