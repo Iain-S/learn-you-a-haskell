@@ -506,7 +506,7 @@ instance Tofu Blob where
 -- Barry has kind of (* -> *) -> * -> *
 data Barry t k p = Barry {yabba :: p, dabba :: t k} deriving (Show)
 
--- So Barry Maybe Int should habe type * -> *, suitable for functor'
+-- So Barry Maybe Int should have type * -> *, suitable for functor'
 
 instance Functor' (Barry t k) where
   fmap' f b = Barry {yabba = f $ yabba b, dabba = dabba b}
