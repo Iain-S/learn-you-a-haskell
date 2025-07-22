@@ -187,3 +187,52 @@ moveKnight' (c, r) =
     inBoard c = c `elem` [1 .. 8]
 
 -- All positions reachable in three moves.
+in3 :: Pos -> [Pos]
+in3 start = do
+  first <- moveKnight start
+  second <- moveKnight first
+  moveKnight second
+
+-- Can we reach a position in three moves?
+canReach :: Pos -> Pos -> Bool
+canReach start end = end `elem` in3 start
+
+-- applyLog :: Monad m => m a -> (a -> m a) -> ma
+applyLog :: (a, String) -> (a -> (b, String)) -> (b, String)
+applyLog (x, log) f = let (y, newlog) = f x in (y, log ++ newlog)
+
+-- Since we don't strictly need a String, we could use Monoid instead
+applyLog' :: (Monoid m) => (a, m) -> (a -> (b, m)) -> (b, m)
+applyLog' (x, log) f = let (y, newlog) = f x in (y, log `mappend` newlog)
+
+type Food = String
+
+type Price = Sum Int
+
+addDrink :: Food -> (Food, Price)
+addDrink "beans" = ("milk", Sum 25)
+addDrink "jerky" = ("whiskey", Sum 99)
+addDrink _ = ("beer", Sum 30)
+
+meanAndCost = ("bean", Sum 10) `applyLog'` addDrink
+
+-- The Writer type
+newtype Writer' w a = Writer' {getWriter :: (a, w)}
+
+-- instance Functor (Writer' w) where
+--   fmap f (Writer' (a, w)) = Writer' (a, f w)
+
+-- instance (Monoid w) => Applicative (Writer' w) where
+
+-- -- For some monoid, m, make Writer' an instance of Monad
+-- instance (Monoid w) => Monad (Writer' w) where
+--   return x = Writer' (x, mempty)
+--   (>>=) :: Monoid w => Writer' w a -> (a -> Writer' w b) -> Writer' w b
+--   Writer' (x,v) >>= f = let Writer' (y, v') = f x in Writer' (y, v `mappend` v')
+
+-- Let's try it out
+aa = getWriter (return 3 :: Writer String Int)
+
+ab = getWriter (return "3" :: Writer String String)
+
+ac = getWriter (return 3 :: Writer (Sum Int) Int)
